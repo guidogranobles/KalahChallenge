@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Kalah Game</title>
+	
+	<script src="/webjars/jquery/3.1.0/jquery.min.js"></script>
+	<script src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="/webjars/sockjs-client/sockjs.min.js"></script>
+	<script src="/webjars/stomp-websocket/stomp.min.js"></script>
+	<script src="/js/wshandler.js"></script>
+	
+	<link rel="stylesheet"
+	          href="/webjars/bootstrap/3.3.7/css/bootstrap.min.css" />
+	
+	<link rel="stylesheet" type="text/css"
+		th:href="@{/css/game-dashboard.css}" />
+		 
+</head>
+
+<body onload="connect()">
+	<div class="container">
+		<div th:replace="game/header:: header"></div>
+		<div class="panel-group">
+			<form class="navbar-form" role="search">
+				<div class="input-group add-on">
+					<input class="form-control" placeholder="Search player"
+						name="srch-term" id="srch-term" type="text">
+					<div class="input-group-btn">
+						<button class="btn btn-default" type="submit">
+							<i class="glyphicon glyphicon-search"></i>
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="panel-group">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<span>Current players available to play.</span>
+				</div>
+				<div class="panel-body" style="padding: 10px;">
+					<div id="availablePlayers"></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="panel-group" style="margin-top: 40px">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<div class="row">
+						<div class="col-md-6 col-xs-6">
+							<span id="currentUser" th:utext="'Player 1: '+ ${userName}"></span>
+						</div>
+						<div class="col-md-6 col-xs-6 text-right text-xs-right ">
+							<span id="remotePlayer">Player 2: Not ready yet</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="panel-body">
+
+					<div class="text-center">
+						<div class="col-md-12">
+							<button id="pit12" type="button" class="btn pit btn-primary disabled" disabled="disabled"
+								onClick="play(12)">0</button>
+							<button id="pit11" type="button" class="btn pit disabled"	disabled="disabled"
+								onClick="play(11)">0</button>
+							<button id="pit10" type="button" class="btn pit disabled"	disabled="disabled"
+								onClick="play(10)">0</button>
+							<button id="pit9" type="button" class="btn pit disabled"	disabled="disabled"
+								onClick="play(9)">0</button>
+							<button id="pit8" type="button" class="btn pit disabled"	disabled="disabled"
+								onClick="play(8)">0</button>
+							<button id="pit7" type="button" class="btn pit disabled"	disabled="disabled"
+								onClick="play(7)">0</button>
+						</div>
+						<div class="col-md-12">
+							<div class="col-md-5 col-xs-4 text-right">
+								<button id="home2" type="button" class="btn pit  disabled"	disabled="disabled">0</button>
+							</div>
+							<div class="col-md-2 col-xs-4"></div>
+							<div class="col-md-5 col-xs-4 text-left">
+								<button id="home1" type="button" class="btn pit disabled"	disabled="disabled">0</button>
+							</div>
+						</div>
+						<div class="col-md-12">
+							<button id="pit1" type="button" class="btn pit  disabled"	disabled="disabled"
+								onClick="play(1)">0</button>
+							<button id="pit2" type="button" class="btn pit  disabled"	disabled="disabled"
+								onClick="play(2)">0</button>
+							<button id="pit3" type="button" class="btn pit  disabled"	disabled="disabled"
+								onClick="play(3)">0</button>
+							<button id="pit4" type="button" class="btn pit disabled"	disabled="disabled"
+								onClick="play(4)">0</button>
+							<button id="pit5" type="button" class="btn pit disabled"	disabled="disabled"
+								onClick="play(5)">0</button>
+							<button id="pit6" type="button" class="btn pit disabled"	disabled="disabled"
+								onClick="play(6)">0</button>
+						</div>
+					</div>
+
+				</div>
+				<div class="panel-footer text-center">
+					<button class="btn btn-lg btn-sm" id="waitPlayerMove">
+						<span
+							class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>Waiting
+						for remote player to play...
+					</button>
+					<button class="btn btn-lg btn-sm" id="yourTurn">
+						<span class="glyphicon glyphicon-arrow-up blink"></span>It's your
+						turn...
+					</button>
+					<button class="btn btn-lg btn-sm" id="remotePlayerRepeat">
+						<span class="glyphicon glyphicon-arrow-up blink"></span>Remote player will repeat
+						turn...
+					</button>
+					<button class="btn btn-lg btn-sm" id="playerRepeat">
+						<span class="glyphicon glyphicon-arrow-up blink"></span>you can play again!						
+					</button> 
+				</div>
+			</div>
+
+
+			<div class="modal fade" id="dlgInvitation" role="dialog">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">
+								<strong>Invitation to play!</strong>
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p id="playerInvitation">You have an invitation to play from
+							</p>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal" id="Accept">Accept</button>
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal" id="Reject">Reject</button>
+						</div>
+					</div>
+				</div>
+				<div class="modal-overlay" id="modal-overlay"></div>
+
+			</div>
+			<div class="modal fade bs-example-modal-sm" id="waitPlayerResponse"
+				tabindex="-1" role="dialog" aria-hidden="true"
+				data-backdrop="static">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h4 class="modal-title">
+								<span class="glyphicon glyphicon-time"> </span>Waiting for
+								player response. Please wait..
+							</h4>
+						</div>
+						<div class="modal-body">
+							<div class="progress">
+								<div
+									class="progress-bar progress-bar-info
+                    progress-bar-striped active"
+									style="width: 100%"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal fade" id="dlgNotResponse" role="dialog">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">
+								<strong>Invitation to play!</strong>
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p id="resInvitation">We are sorry. We did not get any
+								response from player</p>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal" id="Accept">Close</button>
+						</div>
+					</div>
+				</div>
+				<div class="modal-overlay" id="modal-overlay"></div>
+
+			</div>
+			<div class="modal fade" id="dlgWinner" role="dialog">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">
+								<strong>Game Over!</strong>
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p id="gameOver"></p>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">Accept</button>
+						</div>
+					</div>
+				</div>
+				<div class="modal-overlay" id="modal-overlay"></div>
+			</div>
+			<div class="modal fade" id="dlgError" role="dialog">
+				<div class="modal-dialog modal-sm">
+					<div class="modal-content">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title">
+								<strong id="dlgError-header"></strong>
+							</h4>
+						</div>
+						<div class="modal-body">
+							<p id="msgError"></p>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default"
+								data-dismiss="modal">Accept</button>
+						</div>
+					</div>
+				</div>
+				<div class="modal-overlay" id="modal-overlay"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

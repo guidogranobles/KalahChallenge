@@ -1,0 +1,82 @@
+ body {
+    padding-top: 100px;
+ }
+ 
+.pit{
+	background-color:#33daff;	
+	color: white;
+	font-weight: bold;
+	margin-bottom:10px;
+	padding-left: 9px;
+	padding-right:9px;
+}
+
+.nav-tabs {
+    text-align:center;
+}
+
+.li-tab{
+	width:200px;
+}
+
+
+.add-on .input-group-btn > .btn {
+  border-left-width:0;left:-2px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+/* stop the glowing blue shadow */
+.add-on .form-control:focus {
+ box-shadow:none;
+ -webkit-box-shadow:none; 
+ border-color:#cccccc; 
+}
+.form-control{width:20%}
+
+.panel-footer{
+	background-color: white;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  max-width: 100%;
+}
+
+#waitPlayerMove, #yourTurn, #remotePlayerRepeat, #playerRepeat{
+	display: none;
+}
+
+
+.blink {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {  
+  50% { opacity: 0.0; }
+}
+.glyphicon{
+ 	margin-right:10px;
+}
+
+.glyphicon-refresh-animate {
+    -animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
+
+@media (max-width: 767px) {
+    .text-xs-right { text-align:left }
+}
